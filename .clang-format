@@ -1,0 +1,9 @@
+---
+BasedOnStyle: Microsoft
+AlignEscapedNewlines: Left
+Cpp11BracedListStyle: 'false'
+PointerAlignment: Left
+SortIncludes: 'true'
+SortUsingDeclarations: 'true'
+
+...
