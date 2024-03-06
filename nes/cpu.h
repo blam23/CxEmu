@@ -83,6 +83,7 @@ class cpu
     // Op Code Table
     using op_func = std::function<void(cpu*)>;
     op_func m_op_table[0xFF];
+    void setup_op_codes();
 
     // Helpers
     void push(u8 value);

@@ -47,7 +47,7 @@ emulator emulator::load_rom(std::string_view path)
     cart c;
 
     if (c.load(path))
-        std::cout << "ROM Loaded." << std::endl;
+        std::cout << "<> ROM Loaded." << std::endl;
     else
         std::cerr << "Failed to load rom file: '" << path << "'." << std::endl;
 
