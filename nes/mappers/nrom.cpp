@@ -45,4 +45,8 @@ void nrom::write_chr_rom(u16 addr, u8 value)
     return;
 }
 
+void nrom::scan_line()
+{
+}
+
 }; // namespace cx::nes

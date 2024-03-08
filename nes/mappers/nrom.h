@@ -14,9 +14,11 @@ class nrom : public mapper
     u8 read(u16 addr) override;
     void write(u16 addr, u8 value) override;
 
-    bool is_irq_set() override;
     u8 read_chr_rom(u16 addr) override;
     void write_chr_rom(u16 addr, u8 value) override;
+
+    bool is_irq_set() override;
+    void scan_line() override;
 
   private:
     u8 m_ram[0x2000];

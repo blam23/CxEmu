@@ -7,7 +7,7 @@ namespace cx::nes
 
 emulator::emulator(cart&& cart)
     : cx::emulator_base(89342, 60.0), m_cart{ cart }, m_mapper{ mapper::create(m_cart.mapper(), &m_cart) },
-      m_cpu_bus{ &m_ppu, &m_apu, m_mapper.get() }, m_cpu{ &m_cpu_bus }
+      m_ppu{ this }, m_cpu{ this }
 {
 }
 
@@ -40,6 +40,11 @@ void emulator::reset()
 
 void emulator::shudown()
 {
+}
+
+void emulator::set_mirror(mirroring m)
+{
+    m_ppu.update_mirroring(m);
 }
 
 emulator emulator::load_rom(std::string_view path)

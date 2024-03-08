@@ -17,9 +17,11 @@ class mapper
     virtual u8 read(u16 addr) = 0;
     virtual void write(u16 addr, u8 value) = 0;
 
-    virtual bool is_irq_set() = 0;
     virtual u8 read_chr_rom(u16 addr) = 0;
     virtual void write_chr_rom(u16 addr, u8 value) = 0;
+
+    virtual bool is_irq_set() = 0;
+    virtual void scan_line() = 0;
 
     static void register_mappers();
 

@@ -2,6 +2,7 @@
 
 #include "core/types.h"
 #include "cpu_bus.h"
+#include "forward.h"
 
 namespace cx::nes
 {
@@ -9,10 +10,12 @@ namespace cx::nes
 class cpu
 {
   public:
-    cpu(cpu_bus* bus) noexcept;
+    cpu(emulator*) noexcept;
     void clock();
     void set_nmi();
     void set_irq();
+
+    cpu_bus m_bus;
 
   private:
     static constexpr u16 NMI_VECTOR{ 0xFFFA };
@@ -61,7 +64,6 @@ class cpu
     };
 
     status_union m_status{ 0 };
-    cpu_bus* m_bus;
 
     // Registers
     u8 a{ 0 };

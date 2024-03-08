@@ -4,14 +4,13 @@
 #include "core/types.h"
 #include "mapper.h"
 #include "ppu.h"
-#include <vector>
 
 namespace cx::nes
 {
 class cpu_bus
 {
   public:
-    cpu_bus(ppu* ppu, apu* apu, mapper* mapper);
+    cpu_bus(emulator*);
 
     u8 read(u16 addr);
     void write(u16 addr, u8 value);
@@ -21,10 +20,6 @@ class cpu_bus
 
   private:
     u8 m_ram[0x800];
-
-    // Other components
-    ppu* m_ppu;
-    apu* m_apu;
-    mapper* m_mapper;
+    emulator* m_system;
 };
 } // namespace cx::nes

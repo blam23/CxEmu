@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core/types.h"
+#include "mirroring.h"
 #include <filesystem>
 #include <fstream>
 #include <vector>
@@ -26,14 +27,6 @@ class cart
         dendy
     };
 
-    enum class mirroring
-    {
-        horizontal,
-        vertical,
-        one_screen_lower,
-        one_screen_upper
-    };
-
     auto current_state() const
     {
         return m_state;
@@ -49,6 +42,7 @@ class cart
     std::vector<u8> m_prg_rom{};
     std::vector<u8> m_chr_rom{};
     u8 m_prg_rom_size;
+    u8 m_chr_rom_size;
 
   private:
     bool try_load();
@@ -58,7 +52,6 @@ class cart
 
     // cart data
     u8 m_mapper;
-    u8 m_chr_rom_size;
 
     mirroring m_mirroring{ mirroring::horizontal };
     bool m_battery_present;

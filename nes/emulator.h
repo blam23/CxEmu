@@ -7,6 +7,7 @@
 #include "cpu.h"
 #include "cpu_bus.h"
 #include "mapper.h"
+#include "mirroring.h"
 #include "ppu.h"
 
 namespace cx::nes
@@ -20,17 +21,17 @@ class emulator : cx::emulator_base
     void reset() override;
     void shudown() override;
 
+    void set_mirror(mirroring);
+
     static emulator load_rom(std::string_view path);
 
-  private:
     cart m_cart;
+    std::unique_ptr<mapper> m_mapper;
     ppu m_ppu;
     apu m_apu;
-    std::unique_ptr<mapper> m_mapper;
-
-    cpu_bus m_cpu_bus;
     cpu m_cpu;
 
+  private:
     u64 m_clock{ 0 };
 };
 

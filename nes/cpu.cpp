@@ -4,10 +4,10 @@
 namespace cx::nes
 {
 
-cpu::cpu(cpu_bus* bus) noexcept : m_bus{ bus }
+cpu::cpu(emulator* system) noexcept : m_bus{ system }
 {
     set_initial_state();
-    pc = m_bus->read_word(RESET_VECTOR);
+    pc = m_bus.read_word(RESET_VECTOR);
 
     setup_op_codes();
 }
@@ -16,7 +16,7 @@ void cpu::clock()
 {
     check_interrupts();
 
-    const auto op{ m_bus->read(pc) };
+    const auto op{ m_bus.read(pc) };
 
     std::cout << std::hex << (u32)pc << " | a:" << (u32)a << " | x:" << (u32)x << " | y:" << (u32)y
               << " | s:" << (u32)sp << " flags nyi "
@@ -73,7 +73,7 @@ void cpu::nmi()
     m_status.flags.interrupt_disable = true;
     push_status();
 
-    pc = m_bus->read_word(NMI_VECTOR);
+    pc = m_bus.read_word(NMI_VECTOR);
 }
 
 void cpu::irq()
@@ -88,13 +88,13 @@ void cpu::irq()
         m_status.flags.interrupt_disable = true;
         push_status();
 
-        pc = m_bus->read_word(IRQ_VECTOR);
+        pc = m_bus.read_word(IRQ_VECTOR);
     }
 }
 
 void cpu::push(u8 value)
 {
-    m_bus->write(sp + 0x100, value);
+    m_bus.write(sp + 0x100, value);
     sp--;
 }
 
@@ -112,7 +112,7 @@ void cpu::push_status()
 auto cpu::pull() -> u8
 {
     sp++;
-    return m_bus->read(sp + 0x100);
+    return m_bus.read(sp + 0x100);
 }
 
 auto cpu::pull_word() -> u16
@@ -140,20 +140,20 @@ auto cpu::get_address(mode mode, bool watch_page_boundary) -> u16
         return argument;
     case mode::zp:
         pc += 2;
-        addr = m_bus->read(argument);
+        addr = m_bus.read(argument);
         return addr;
     case mode::zpx:
         pc += 2;
-        return (m_bus->read(argument) + x) & 0xFF;
+        return (m_bus.read(argument) + x) & 0xFF;
     case mode::zpy:
         pc += 2;
-        return (m_bus->read(argument) + y) & 0xFF;
+        return (m_bus.read(argument) + y) & 0xFF;
     case mode::abs:
         pc += 3;
-        return m_bus->read_word(argument);
+        return m_bus.read_word(argument);
     case mode::absx:
         pc += 3;
-        addr = m_bus->read_word(argument);
+        addr = m_bus.read_word(argument);
         page = addr >> 8;
         addr += x;
         new_page = addr >> 8;
@@ -164,7 +164,7 @@ auto cpu::get_address(mode mode, bool watch_page_boundary) -> u16
         return addr;
     case mode::absy:
         pc += 3;
-        addr = m_bus->read_word(argument);
+        addr = m_bus.read_word(argument);
         page = addr >> 8;
         addr += y;
         new_page = addr >> 8;
@@ -176,14 +176,14 @@ auto cpu::get_address(mode mode, bool watch_page_boundary) -> u16
     case mode::indx:
         pc += 2;
 
-        addr = m_bus->read(argument);
+        addr = m_bus.read(argument);
         addr += x;
         addr &= 0xFF;
-        return m_bus->read_word_wrapped(addr);
+        return m_bus.read_word_wrapped(addr);
     case mode::indy:
         pc += 2;
-        addr = m_bus->read(argument);
-        addr = m_bus->read_word_wrapped(addr);
+        addr = m_bus.read(argument);
+        addr = m_bus.read_word_wrapped(addr);
         if (watch_page_boundary && ((addr & 0xFF00) != ((addr + y) & 0xFF00)))
             m_clock++;
 
@@ -199,12 +199,12 @@ auto cpu::get_address(mode mode, bool watch_page_boundary) -> u16
 
 auto cpu::read_next(mode mode, bool watch_page_boundary) -> u8
 {
-    return m_bus->read(get_address(mode, watch_page_boundary));
+    return m_bus.read(get_address(mode, watch_page_boundary));
 }
 
 void cpu::write_next(mode mode, u8 value, bool watch_page_boundary)
 {
-    m_bus->write(get_address(mode, watch_page_boundary), value);
+    m_bus.write(get_address(mode, watch_page_boundary), value);
 }
 
 void cpu::set_negative_and_zero(u8 value)
@@ -430,11 +430,11 @@ void cpu::dec_addr(mode mode)
     add_shift_clock_time(mode);
 
     auto addr{ get_address(mode, false) };
-    auto value{ m_bus->read(addr) };
+    auto value{ m_bus.read(addr) };
     value--;
     set_negative_and_zero(value);
 
-    m_bus->write(addr, value);
+    m_bus.write(addr, value);
 }
 
 void cpu::inc_addr(mode mode)
@@ -442,11 +442,11 @@ void cpu::inc_addr(mode mode)
     add_shift_clock_time(mode);
 
     auto addr{ get_address(mode, false) };
-    auto value{ m_bus->read(addr) };
+    auto value{ m_bus.read(addr) };
     value++;
     set_negative_and_zero(value);
 
-    m_bus->write(addr, value);
+    m_bus.write(addr, value);
 }
 
 void cpu::asl_addr(mode mode)
@@ -454,12 +454,12 @@ void cpu::asl_addr(mode mode)
     add_shift_clock_time(mode);
 
     auto addr{ get_address(mode, false) };
-    auto value{ m_bus->read(addr) };
+    auto value{ m_bus.read(addr) };
     m_status.flags.carry = (value & 0x80) == 0x80;
     value <<= 1;
     set_negative_and_zero(value);
 
-    m_bus->write(addr, value);
+    m_bus.write(addr, value);
 }
 
 void cpu::lsr_addr(mode mode)
@@ -467,12 +467,12 @@ void cpu::lsr_addr(mode mode)
     add_shift_clock_time(mode);
 
     auto addr{ get_address(mode, false) };
-    auto value{ m_bus->read(addr) };
+    auto value{ m_bus.read(addr) };
     m_status.flags.carry = (value & 0x80) == 0x80;
     value >>= 1;
     set_negative_and_zero(value);
 
-    m_bus->write(addr, value);
+    m_bus.write(addr, value);
 }
 
 void cpu::rol_addr(mode mode)
@@ -481,12 +481,12 @@ void cpu::rol_addr(mode mode)
     add_shift_clock_time(mode);
 
     auto addr{ get_address(mode, false) };
-    auto value{ m_bus->read(addr) };
+    auto value{ m_bus.read(addr) };
     m_status.flags.carry = (value & 0x80) == 0x80;
     value = static_cast<u8>((value << 1) + (prev_carry ? 1 : 0));
     set_negative_and_zero(value);
 
-    m_bus->write(addr, value);
+    m_bus.write(addr, value);
 }
 
 void cpu::ror_addr(mode mode)
@@ -495,12 +495,12 @@ void cpu::ror_addr(mode mode)
     add_shift_clock_time(mode);
 
     auto addr{ get_address(mode, false) };
-    auto value{ m_bus->read(addr) };
+    auto value{ m_bus.read(addr) };
     m_status.flags.carry = (value & 0x80) == 0x80;
     value = static_cast<u8>((value >> 1) + (prev_carry ? 0x80 : 0));
     set_negative_and_zero(value);
 
-    m_bus->write(addr, value);
+    m_bus.write(addr, value);
 }
 
 void cpu::nop()
@@ -519,14 +519,14 @@ void cpu::test_bit(mode mode)
     {
     case mode::zp:
         m_clock += 3;
-        addr = m_bus->read(argument);
-        value = m_bus->read(addr);
+        addr = m_bus.read(argument);
+        value = m_bus.read(addr);
         pc += 2;
         break;
     case mode::abs:
         m_clock += 4;
-        addr = m_bus->read_word(argument);
-        value = m_bus->read(addr);
+        addr = m_bus.read_word(argument);
+        value = m_bus.read(addr);
         pc += 3;
         break;
     default:
@@ -548,14 +548,14 @@ void cpu::jump(mode mode)
     {
     case mode::abs:
         m_clock += 3;
-        addr = m_bus->read_word(argument);
+        addr = m_bus.read_word(argument);
         pc = addr;
         break;
     case mode::ind:
         m_clock += 5;
-        addr = m_bus->read_word(argument);
+        addr = m_bus.read_word(argument);
 
-        pc = m_bus->read_word_wrapped(addr);
+        pc = m_bus.read_word_wrapped(addr);
 
         if ((oldPC & 0xFF00) != (pc & 0xFF00))
             m_clock += 2;
@@ -572,7 +572,7 @@ void cpu::brk()
 
     push_word(pc);
     push_status();
-    pc = m_bus->read_word(0xFFFE);
+    pc = m_bus.read_word(0xFFFE);
     m_status.flags.interrupt_disable = true;
 }
 
@@ -597,7 +597,7 @@ void cpu::jsr()
     m_clock += 6;
 
     push_word(pc + 2);
-    pc = m_bus->read_word(pc + 1);
+    pc = m_bus.read_word(pc + 1);
 }
 
 void cpu::branch(bool cond)
@@ -609,7 +609,7 @@ void cpu::branch(bool cond)
         m_clock++;
 
         u16 argument{ static_cast<u16>(pc + 1) };
-        i8 addr{ static_cast<i8>(m_bus->read(argument)) };
+        i8 addr{ static_cast<i8>(m_bus.read(argument)) };
         pc += 2;
         auto page{ pc >> 8 };
         pc = pc + addr;
@@ -683,7 +683,7 @@ void cpu::pla()
     m_clock += 4;
 
     sp++;
-    a = m_bus->read(sp + 0x100);
+    a = m_bus.read(sp + 0x100);
     set_negative_and_zero(a);
 }
 
@@ -692,7 +692,7 @@ void cpu::pha()
     pc++;
     m_clock += 3;
 
-    m_bus->write(sp + 0x100, a);
+    m_bus.write(sp + 0x100, a);
     sp--;
 }
 
