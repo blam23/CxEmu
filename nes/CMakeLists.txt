@@ -12,6 +12,7 @@
   "mapper.cpp"
   "cpu_bus.cpp"
   "mappers/nrom.cpp"
+  "mappers/mmc1.cpp"
 )
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)

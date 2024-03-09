@@ -1,9 +1,10 @@
 #pragma once
 
-#include "cart.h"
 #include "core/types.h"
+#include "forward.h"
 #include <functional>
 #include <map>
+#include <memory>
 
 namespace cx::nes
 {
@@ -25,22 +26,9 @@ class mapper
 
     static void register_mappers();
 
-    static std::unique_ptr<mapper> create(u8 number, cart* cart)
-    {
-        if (!s_registered)
-        {
-            register_mappers();
-            s_registered = true;
-        }
+    static auto create(u8 number, emulator* system) -> std::unique_ptr<mapper>;
 
-        auto itr{ s_factories.find(number) };
-        if (itr == s_factories.end())
-            throw std::exception{ "Mapper not supported." };
-
-        return itr->second(cart);
-    }
-
-    using factory = std::function<std::unique_ptr<mapper>(cart* cart)>;
+    using factory = std::function<std::unique_ptr<mapper>(emulator* system)>;
     static void register_factory(u8 number, factory factory)
     {
         s_factories[number] = factory;

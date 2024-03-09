@@ -6,10 +6,10 @@
 namespace cx::nes
 {
 
-class nrom : public mapper
+class mmc1 : public mapper
 {
   public:
-    nrom(emulator* system);
+    mmc1(emulator* system);
 
     u8 read(u16 addr) override;
     void write(u16 addr, u8 value) override;
@@ -22,7 +22,20 @@ class nrom : public mapper
 
   private:
     u8 m_ram[0x2000];
-    u16 m_mask{ 0x3FFF };
+
+    u8 m_chr_page_1{ 0x0 };
+    u8 m_chr_page_2{ 0x0 };
+    u8 m_chr_page_chunk{ 0x0 };
+
+    u8 m_prg_page_1{ 0x0 };
+    u8 m_prg_page_2{ 0x0 };
+    u8 m_prg_page_chunk{ 0x0 };
+
+    // Registers
+    u8 m_load{ 0 };
+    u8 m_load_count{ 0 };
+    u8 m_control{ 0 };
+
     emulator* m_system;
 };
 
