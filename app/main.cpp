@@ -1,4 +1,4 @@
-#include "SDL.h"
+﻿#include "SDL.h"
 #include "nes/emulator.h"
 #include "spdlog/async.h"
 #include "spdlog/sinks/basic_file_sink.h"
@@ -6,6 +6,7 @@
 #include <print>
 #include <thread>
 
+constexpr bool delay{ true };
 constexpr int scale{ 4 };
 constexpr int width{ 256 };
 constexpr int height{ 240 };
@@ -33,8 +34,8 @@ int main(int argc, char* argv[])
 
     cx::nes::emulator emulator{ cx::nes::emulator::load_rom("D:/Test/NES/nestest.nes") };
 
-    SDL_Window* window = SDL_CreateWindow("First program", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-                                          scale * width, scale * height, SDL_WINDOW_OPENGL);
+    SDL_Window* window = SDL_CreateWindow("CxEmu", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, scale * width,
+                                          scale * height, SDL_WINDOW_OPENGL);
     if (window == NULL)
     {
         std::println("Unable to create SDL window: {}", SDL_GetError());
@@ -60,11 +61,26 @@ int main(int argc, char* argv[])
 
     bool running{ true };
     std::thread emu_thread{ [&]() {
+        auto last_frame{ SDL_GetPerformanceCounter() };
+
         while (running)
         {
             for (size_t i = 0; i < emulator.cycles_per_frame(); i++)
             {
                 emulator.clock();
+            }
+            if (delay)
+            {
+                const auto now{ SDL_GetPerformanceCounter() };
+                auto delta{ (f64)((now - last_frame) * 1000 / (f64)SDL_GetPerformanceFrequency()) };
+
+                while (delta < 30)
+                {
+                    const auto now{ SDL_GetPerformanceCounter() };
+                    delta = (f64)((now - last_frame) * 1000 / (f64)SDL_GetPerformanceFrequency());
+                }
+
+                last_frame = now;
             }
         }
     } };
@@ -135,7 +151,7 @@ int main(int argc, char* argv[])
 
         if (counter > 1000.0)
         {
-            std::println("FPS: {}", frames);
+            SDL_SetWindowTitle(window, std::format("FPS: {}", frames).c_str());
             frames = 0;
             counter = 0.0;
         }
