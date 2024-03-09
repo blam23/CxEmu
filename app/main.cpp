@@ -1,4 +1,4 @@
-﻿#include "SDL.h"
+#include "SDL.h"
 #include "nes/emulator.h"
 #include "spdlog/async.h"
 #include "spdlog/sinks/basic_file_sink.h"
@@ -51,6 +51,12 @@ int main(int argc, char* argv[])
         SDL_memcpy(pixel_surface->pixels, data, size);
         frames++;
     });
+
+    // setup a renderer for just for vsync.
+    SDL_Renderer* renderer{ SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC) };
+    SDL_Texture* dummy_tex{ SDL_CreateTexture(renderer, window_surface->format->format, SDL_TEXTUREACCESS_STREAMING, 1,
+                                              1) };
+    SDL_Rect dummy_rect{ 0, 0, 1, 1 };
 
     bool running{ true };
     std::thread emu_thread{ [&]() {
@@ -112,8 +118,15 @@ int main(int argc, char* argv[])
                 }
             }
         }
-        // draw
+
+        // draw to window surface
         SDL_LowerBlitScaled(pixel_surface, &pixel_rect, window_surface, &window_rect);
+
+        // force vsync
+        SDL_RenderCopy(renderer, dummy_tex, nullptr, &dummy_rect);
+        SDL_RenderPresent(renderer);
+
+        // actually update window
         SDL_UpdateWindowSurface(window);
 
         const auto now{ SDL_GetPerformanceCounter() };
