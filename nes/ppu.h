@@ -14,9 +14,13 @@ class ppu
 {
   public:
     ppu(emulator*);
+
     void clock();
+
     auto read(u16 addr) -> u8;
     void write(u16 addr, u8 value);
+    void oam_dma(u8 value);
+
     void update_mirroring(mirroring);
 
     ppu_bus m_bus;
@@ -29,7 +33,7 @@ class ppu
     static constexpr u32 RENDER_WIDTH{ 256 };
     static constexpr u32 RENDER_HEIGHT{ 240 };
 
-    using frame_event = std::function<void(u8[])>;
+    using frame_event = std::function<void(u8[], size_t)>;
     void set_frame_complete_callback(frame_event);
 
   private:
@@ -38,6 +42,16 @@ class ppu
     void setup_sprites_on_next_line();
     auto render_pixel_background() -> bool;
     void render_pixel_sprite(bool render_bg);
+
+    struct colour
+    {
+        u8 r;
+        u8 g;
+        u8 b;
+    };
+    auto lookup_bg_palette(u8 index) -> colour;
+    auto lookup_sprite_palette(u8 index) -> colour;
+    auto lookup_colour(u8 c) -> colour;
 
     enum class sprite_size
     {
@@ -51,9 +65,42 @@ class ppu
         u8 y;
         u8 attr;
         u8 idx;
-
-        bool is_sprite_zero{ false };
+        bool is_sprite_zero;
     };
+    auto should_ignore_sprite(const sprite& sprite) -> bool;
+
+    struct mask_struct
+    {
+        bool greyscale : 1;
+        bool show_background_leftmost : 1;
+        bool show_sprites_leftmost : 1;
+        bool show_background : 1;
+        bool show_sprites : 1;
+        bool emphasize_red : 1;
+        bool emphasize_green : 1;
+        bool emphasize_blue : 1;
+    };
+
+    union mask_union {
+        mask_struct flags;
+        u8 bits;
+    };
+
+    mask_union m_mask{ 0 };
+
+    void write_ctrl(u8 value);
+    void write_mask(u8 value);
+    void write_oam_addr(u8 value);
+    void write_oam(u8 value);
+    void write_scroll(u8 value);
+    void write_addr(u8 value);
+    void write_addr_value(u8 value);
+
+    auto get_status_byte() -> u8;
+    auto read_addr_value() -> u8;
+
+    u8 m_read_buffer{ 0 };
+    auto buffered_read(u8 new_value) -> u8;
 
     // Registers
     u8 v; // Current VRAM Address
@@ -85,7 +132,7 @@ class ppu
     std::vector<sprite> m_current_sprites{};
 
     // Control Info
-    u16 m_oam_addr{ 0x0 };
+    u8 m_oam_addr{ 0x0 };
     u16 m_base_table_addr{ 0x2000 };
     u16 m_vram_table_addr_inc{ 0x1 };
     u16 m_sprite_table_addr{ 0x0 };
@@ -94,18 +141,7 @@ class ppu
     bool m_write_ext_pins{ false };
     bool m_nmi_on_vblank{ false };
 
-    // Mask info
-    bool m_greyscale{ false };
-    bool m_show_sprites{ false };
-    bool m_show_sprites_leftmost{ false };
-    bool m_show_background{ false };
-    bool m_show_background_leftmost{ false };
-    bool m_emphasize_red{ false };
-    bool m_emphasize_green{ false };
-    bool m_emphasize_blue{ false };
-
     // Data
-    ppu_bus m_bus;
     u8 m_bgr24bmp[RENDER_WIDTH * RENDER_HEIGHT * 3];
     u8 m_oam[0x100];
 

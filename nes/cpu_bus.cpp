@@ -1,6 +1,7 @@
 #include "cpu_bus.h"
 #include "emulator.h"
-#include <iostream>
+
+#include <print>
 
 namespace cx::nes
 {
@@ -16,9 +17,9 @@ u8 cpu_bus::read(u16 addr)
     if (addr < 0x4000)
         return m_system->m_ppu.read(addr);
     if (addr == 0x4016)
-        return 0; // TODO: joypad1
+        return m_system->m_jp1.read();
     if (addr == 0x4017)
-        return 0; // TODO: joypad2
+        return m_system->m_jp2.read();
     if (addr < 0x4020)
         return m_system->m_apu.read(addr);
 
@@ -27,14 +28,22 @@ u8 cpu_bus::read(u16 addr)
 
 void cpu_bus::write(u16 addr, u8 value)
 {
+    if (addr == 0x002)
+        std::println("0x2: {}", value);
+
+    if (addr == 0x003)
+        std::println("0x3: {}", value);
+
     if (addr < 0x2000)
         m_ram[addr] = value;
     else if (addr < 0x4000)
         m_system->m_ppu.write(addr, value);
+    else if (addr == 0x4014)
+        m_system->m_ppu.oam_dma(value);
     else if (addr == 0x4016)
-        std::cout << "jp1 write: " << value << std::endl;
+        m_system->m_jp1.poll(value);
     else if (addr == 0x4017)
-        std::cout << "jp2 write: " << value << std::endl;
+        m_system->m_jp2.poll(value);
     else if (addr < 0x4020)
         m_system->m_apu.write(addr, value);
     else

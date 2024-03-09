@@ -43,6 +43,7 @@ class cart
     std::vector<u8> m_chr_rom{};
     u8 m_prg_rom_size;
     u8 m_chr_rom_size;
+    mirroring m_mirroring{ mirroring::horizontal };
 
   private:
     bool try_load();
@@ -53,7 +54,6 @@ class cart
     // cart data
     u8 m_mapper;
 
-    mirroring m_mirroring{ mirroring::horizontal };
     bool m_battery_present;
     region m_region;
 

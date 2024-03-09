@@ -241,6 +241,17 @@ void cpu::setup_op_codes()
     m_op_table[0x76] = [](cpu* c) { c->ror_addr(mode::zpx); };
     m_op_table[0x6E] = [](cpu* c) { c->ror_addr(mode::abs); };
     m_op_table[0x7E] = [](cpu* c) { c->ror_addr(mode::absx); };
+
+    //
+    // Unofficial
+    //
+
+    // NOPs
+    m_op_table[0x04] = [](cpu* c) { c->nop(3); };
+    m_op_table[0x44] = [](cpu* c) { c->nop(3); };
+    m_op_table[0x64] = [](cpu* c) { c->nop(3); };
+
+    m_op_table[0x0C] = [](cpu* c) { c->nop(4); };
 }
 
 } // namespace cx::nes

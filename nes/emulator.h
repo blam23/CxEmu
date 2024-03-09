@@ -6,6 +6,7 @@
 #include "cart.h"
 #include "cpu.h"
 #include "cpu_bus.h"
+#include "joypad.h"
 #include "mapper.h"
 #include "mirroring.h"
 #include "ppu.h"
@@ -13,7 +14,7 @@
 namespace cx::nes
 {
 
-class emulator : cx::emulator_base
+class emulator : public cx::emulator_base
 {
   public:
     emulator(cart&& cart);
@@ -30,6 +31,8 @@ class emulator : cx::emulator_base
     ppu m_ppu;
     apu m_apu;
     cpu m_cpu;
+    joypad m_jp1{};
+    joypad m_jp2{};
 
   private:
     u64 m_clock{ 0 };

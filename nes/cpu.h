@@ -123,7 +123,7 @@ class cpu
     void rol_addr(mode);
     auto ror(u8) -> u8;
     void ror_addr(mode);
-    void nop();
+    void nop(u64 cycles = 2);
     void test_bit(mode);
     void jump(mode);
     void brk();

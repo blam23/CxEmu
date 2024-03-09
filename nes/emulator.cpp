@@ -9,6 +9,7 @@ emulator::emulator(cart&& cart)
     : cx::emulator_base(89342, 60.0), m_cart{ cart }, m_mapper{ mapper::create(m_cart.mapper(), &m_cart) },
       m_ppu{ this }, m_cpu{ this }
 {
+    set_mirror(m_cart.m_mirroring);
 }
 
 void emulator::clock()

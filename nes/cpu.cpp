@@ -1,5 +1,9 @@
 #include "cpu.h"
-#include <iostream>
+#include <print>
+
+#include "spdlog/spdlog.h"
+
+std::shared_ptr<spdlog::logger> g_log{};
 
 namespace cx::nes
 {
@@ -8,8 +12,10 @@ cpu::cpu(emulator* system) noexcept : m_bus{ system }
 {
     set_initial_state();
     pc = m_bus.read_word(RESET_VECTOR);
-
+    pc = 0xC000;
     setup_op_codes();
+
+    g_log = spdlog::get("async");
 }
 
 void cpu::clock()
@@ -18,14 +24,13 @@ void cpu::clock()
 
     const auto op{ m_bus.read(pc) };
 
-    std::cout << std::hex << (u32)pc << " | a:" << (u32)a << " | x:" << (u32)x << " | y:" << (u32)y
-              << " | s:" << (u32)sp << " flags nyi "
-              << " | " << (u32)op << std::endl;
+    if (g_log)
+        g_log->debug("{:#06x} | a: {:#04x} | x: {:#04x} | y: {:#04x} | s: {:#06x} | {:#04x}", pc, a, x, y, sp, op);
 
     const auto func{ m_op_table[op] };
     if (!func)
     {
-        std::cerr << "Op code '0x" << std::hex << (u32)op << "' not supported." << std::endl;
+        std::println("Op code '{:#04x}' not supported.", op);
         exit(-1);
         return;
     }
@@ -503,10 +508,10 @@ void cpu::ror_addr(mode mode)
     m_bus.write(addr, value);
 }
 
-void cpu::nop()
+void cpu::nop(u64 cycles)
 {
     pc++;
-    m_clock += 2;
+    m_clock += cycles;
 }
 
 void cpu::test_bit(mode mode)
