@@ -12,7 +12,7 @@ cpu::cpu(emulator* system) noexcept : m_bus{ system }
 {
     set_initial_state();
     pc = m_bus.read_word(RESET_VECTOR);
-    pc = 0xC000;
+    // pc = 0xC000;
     setup_op_codes();
 
     g_log = spdlog::get("async");
@@ -24,9 +24,14 @@ void cpu::clock()
 
     const auto op{ m_bus.read(pc) };
 
-    if (g_log)
-        g_log->debug("{:#06x} | a: {:#04x} | x: {:#04x} | y: {:#04x} | s: {:#06x} | {:#04x}", pc, a, x, y, sp, op);
-
+    // if (g_log)
+    // {
+    //     g_log->debug("{:#06x} | a: {:#04x} | x: {:#04x} | y: {:#04x} | s: {:#06x} | {}{}-- {}{}{}{} | {:#04x}", pc,
+    //     a,
+    //                  x, y, sp, m_status.flags.negative ? 'N' : '-', m_status.flags.overflow ? 'V' : '-',
+    //                  m_status.flags.decimal ? 'D' : '-', m_status.flags.interrupt_disable ? 'I' : '-',
+    //                  m_status.flags.zero ? 'Z' : '-', m_status.flags.carry ? 'C' : '-', op);
+    // }
     const auto func{ m_op_table[op] };
     if (!func)
     {
@@ -358,7 +363,7 @@ void cpu::cmp(u8 value, mode mode)
 {
     add_arth_clock_time(mode);
 
-    u64 res{ static_cast<u64>(value - read_next(mode)) };
+    i64 res{ value - read_next(mode) };
     m_status.flags.negative = (res & 0x80) == 0x80;
     m_status.flags.zero = res == 0;
     m_status.flags.carry = res >= 0;
@@ -400,7 +405,7 @@ auto cpu::lsr(u8 value) -> u8
     add_arth_clock_time(mode::imm);
 
     pc++;
-    m_status.flags.carry = (value & 0x80) == 0x80;
+    m_status.flags.carry = (value & 0x1) == 0x1;
     u8 ret{ static_cast<u8>(value >> 1) };
     set_negative_and_zero(ret);
     return ret;
@@ -424,7 +429,7 @@ auto cpu::ror(u8 value) -> u8
     add_arth_clock_time(mode::imm);
 
     pc++;
-    m_status.flags.carry = (value & 0x80) == 0x80;
+    m_status.flags.carry = (value & 0x1) == 0x1;
     u8 ret{ static_cast<u8>((value >> 1) + (prev_carry ? 0x80 : 0)) };
     set_negative_and_zero(ret);
     return ret;
@@ -473,7 +478,7 @@ void cpu::lsr_addr(mode mode)
 
     auto addr{ get_address(mode, false) };
     auto value{ m_bus.read(addr) };
-    m_status.flags.carry = (value & 0x80) == 0x80;
+    m_status.flags.carry = (value & 0x1) == 0x1;
     value >>= 1;
     set_negative_and_zero(value);
 
@@ -501,7 +506,7 @@ void cpu::ror_addr(mode mode)
 
     auto addr{ get_address(mode, false) };
     auto value{ m_bus.read(addr) };
-    m_status.flags.carry = (value & 0x80) == 0x80;
+    m_status.flags.carry = (value & 0x1) == 0x1;
     value = static_cast<u8>((value >> 1) + (prev_carry ? 0x80 : 0));
     set_negative_and_zero(value);
 
@@ -661,7 +666,7 @@ void cpu::tya()
     pc++;
     m_clock += 2;
 
-    y = x;
+    a = y;
     set_negative_and_zero(a);
 }
 

@@ -24,7 +24,7 @@ auto init_sdl() -> bool
 int main(int argc, char* argv[])
 {
     auto async_file = spdlog::basic_logger_mt<spdlog::async_factory>("async", "output.txt");
-    async_file->set_level(spdlog::level::trace);
+    // async_file->set_level(spdlog::level::trace);
 
     if (!init_sdl())
         return 1;

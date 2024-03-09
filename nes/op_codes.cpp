@@ -247,11 +247,11 @@ void cpu::setup_op_codes()
     //
 
     // NOPs
-    m_op_table[0x04] = [](cpu* c) { c->nop(3); };
-    m_op_table[0x44] = [](cpu* c) { c->nop(3); };
-    m_op_table[0x64] = [](cpu* c) { c->nop(3); };
+    //m_op_table[0x04] = [](cpu* c) { c->nop(3); };
+    //m_op_table[0x44] = [](cpu* c) { c->nop(3); };
+    //m_op_table[0x64] = [](cpu* c) { c->nop(3); };
 
-    m_op_table[0x0C] = [](cpu* c) { c->nop(4); };
+    //m_op_table[0x0C] = [](cpu* c) { c->nop(4); };
 }
 
 } // namespace cx::nes
