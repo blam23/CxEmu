@@ -359,8 +359,8 @@ void ppu::render_pixel_sprite(bool render_bg)
 
         auto palette{ sprite.attr & 0x3 };
         auto front{ (sprite.attr & 0x20) == 0 };
-        auto flip_x{ (sprite.attr & 0x40) == 0 };
-        auto flip_y{ (sprite.attr & 0x80) == 0 };
+        auto flip_x{ (sprite.attr & 0x40) == 0x40 };
+        auto flip_y{ (sprite.attr & 0x80) == 0x80 };
 
         u8 pixel_x{ static_cast<u8>(m_scan_x - sprite.x) };
         u8 pixel_y{ static_cast<u8>(m_scan_line - sprite.y) };

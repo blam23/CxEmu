@@ -28,12 +28,6 @@ u8 cpu_bus::read(u16 addr)
 
 void cpu_bus::write(u16 addr, u8 value)
 {
-    if (addr == 0x002)
-        std::println("0x2: {}", value);
-
-    if (addr == 0x003)
-        std::println("0x3: {}", value);
-
     if (addr < 0x2000)
         m_ram[addr] = value;
     else if (addr < 0x4000)
