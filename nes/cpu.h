@@ -11,13 +11,15 @@ class cpu
 {
   public:
     cpu(emulator*) noexcept;
-    void clock();
+    auto clock() -> u64;
     void set_nmi();
     void set_irq();
 
     cpu_bus m_bus;
 
   private:
+    emulator* m_system;
+
     static constexpr u16 NMI_VECTOR{ 0xFFFA };
     static constexpr u16 RESET_VECTOR{ 0xFFFC };
     static constexpr u16 IRQ_VECTOR{ 0xFFFE };
@@ -73,7 +75,7 @@ class cpu
     u16 pc{ 0 };
 
     // Clock
-    u64 m_total_clock{ 0 };
+    u64 m_total_clock{ 7 };
     u64 m_cycles{ 0 };
     u64 m_clock{ 0 };
     u64 m_instrs{ 0 };

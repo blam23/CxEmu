@@ -12,27 +12,30 @@ emulator::emulator(cart&& cart)
     set_mirror(m_cart.m_mirroring);
 }
 
-void emulator::clock()
+auto emulator::clock() -> u8
 {
-    // Always clock PPU
-    m_ppu.clock();
+    if (m_mapper->is_irq_set())
+        m_cpu.set_irq();
 
-    // Clock APU every 6 cycles
-    if (m_clock % 6 == 0)
+    auto cycles{ m_cpu.clock() };
+    auto ret{ cycles };
+
+    while (cycles > 0)
     {
-        m_apu.clock();
+        // Clock ppu 3 times for each cycle
+        m_ppu.clock();
+        m_ppu.clock();
+        m_ppu.clock();
+
+        // Clock APU every 6 cycles
+        if (m_clock % 6 == 0)
+            m_apu.clock();
+
+        m_clock++;
+        cycles--;
     }
 
-    // Clock CPU every 3 cycles
-    if (m_clock % 3 == 0)
-    {
-        if (m_mapper->is_irq_set())
-            m_cpu.set_irq();
-
-        m_cpu.clock();
-    }
-
-    m_clock++;
+    return ret;
 }
 
 void emulator::reset()

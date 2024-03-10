@@ -36,6 +36,9 @@ class ppu
     using frame_event = std::function<void(u8[], size_t)>;
     void set_frame_complete_callback(frame_event);
 
+    u64 m_scan_x{ 21 };
+    u64 m_scan_line{ 0 };
+
   private:
     emulator* m_system;
 
@@ -112,7 +115,7 @@ class ppu
 
     // Frame info
     u64 m_frame{ 0 };
-    u64 m_clock{ 0 };
+    u64 m_clock{ 22 };
     bool m_odd_even_flag{ false };
     bool m_vblank{ false };
     bool m_dont_vblank{ false };
@@ -120,8 +123,7 @@ class ppu
     bool m_sprite_zero_hit{ false };
 
     // Pixel data
-    u64 m_scan_x{ 0 };
-    u64 m_scan_line{ 0 };
+
     bool m_scrolling_x{ true };
     u8 m_scroll_x{ 0 };
     u8 m_next_scroll_x{ 0 };

@@ -18,7 +18,7 @@ class emulator : public cx::emulator_base
 {
   public:
     emulator(cart&& cart);
-    void clock() override;
+    auto clock() -> u8 override;
     void reset() override;
     void shudown() override;
 

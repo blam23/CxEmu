@@ -15,7 +15,7 @@ class emulator_base
     {
     }
 
-    virtual void clock() = 0;
+    virtual auto clock() -> u8 = 0;
     virtual void reset() = 0;
     virtual void shudown() = 0;
 
@@ -34,4 +34,3 @@ class emulator_base
 };
 
 } // namespace cx
-

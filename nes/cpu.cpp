@@ -1,4 +1,5 @@
 #include "cpu.h"
+#include "emulator.h"
 #include <print>
 
 #include "spdlog/spdlog.h"
@@ -8,42 +9,46 @@ std::shared_ptr<spdlog::logger> g_log{};
 namespace cx::nes
 {
 
-cpu::cpu(emulator* system) noexcept : m_bus{ system }
+cpu::cpu(emulator* system) noexcept : m_bus{ system }, m_system{ system }
 {
     set_initial_state();
     pc = m_bus.read_word(RESET_VECTOR);
-    // pc = 0xC000;
     setup_op_codes();
 
     g_log = spdlog::get("async");
 }
 
-void cpu::clock()
+auto cpu::clock() -> u64
 {
     check_interrupts();
 
     const auto op{ m_bus.read(pc) };
 
-    // if (g_log)
-    // {
-    //     g_log->debug("{:#06x} | a: {:#04x} | x: {:#04x} | y: {:#04x} | s: {:#06x} | {}{}-- {}{}{}{} | {:#04x}", pc,
-    //     a,
-    //                  x, y, sp, m_status.flags.negative ? 'N' : '-', m_status.flags.overflow ? 'V' : '-',
-    //                  m_status.flags.decimal ? 'D' : '-', m_status.flags.interrupt_disable ? 'I' : '-',
-    //                  m_status.flags.zero ? 'Z' : '-', m_status.flags.carry ? 'C' : '-', op);
-    // }
+#ifdef NOISY
+    if (g_log)
+    {
+        g_log->debug("{:#06x} | a: {:#04x} | x: {:#04x} | y: {:#04x} | s: {:#06x} | {}{}-- {}{}{}{} | {:#04x} | "
+                     "ppu:{:03},{:03} | cyc:{}",
+                     pc, a, x, y, sp, m_status.flags.negative ? 'N' : '-', m_status.flags.overflow ? 'V' : '-',
+                     m_status.flags.decimal ? 'D' : '-', m_status.flags.interrupt_disable ? 'I' : '-',
+                     m_status.flags.zero ? 'Z' : '-', m_status.flags.carry ? 'C' : '-', op, m_system->m_ppu.m_scan_line,
+                     m_system->m_ppu.m_scan_x, m_total_clock);
+    }
+#endif
     const auto func{ m_op_table[op] };
     if (!func)
     {
         std::println("Op code '{:#04x}' not supported.", op);
         exit(-1);
-        return;
+        return 0;
     }
 
     func(this);
     m_total_clock += m_clock;
-    m_cycles += m_clock;
+    const u64 cycles{ m_clock };
     m_clock = 0;
+
+    return cycles;
 }
 
 void cpu::set_nmi()
@@ -77,7 +82,7 @@ void cpu::check_interrupts()
 void cpu::nmi()
 {
     m_nmi = false;
-    m_cycles += 8;
+    m_clock += 8;
     push_word(pc);
     m_status.flags.break_bit = true;
     m_status.flags.interrupt_disable = true;
@@ -91,7 +96,7 @@ void cpu::irq()
     if (!m_status.flags.interrupt_disable)
     {
         m_irq = false;
-        m_cycles += 7;
+        m_clock += 7;
 
         push_word(pc);
         m_status.flags.break_bit = true;
@@ -245,9 +250,9 @@ auto cpu::load(mode mode) -> u8
 
 void cpu::store(u8 value, mode mode)
 {
-    if (mode == mode::zp || mode == mode::zpy)
+    if (mode == mode::zp)
         m_clock += 3;
-    else if (mode == mode::abs || mode == mode::zpx)
+    else if (mode == mode::abs || mode == mode::zpx || mode == mode::zpy)
         m_clock += 4;
     else if (mode == mode::absx || mode == mode::absy)
         m_clock += 5;
@@ -350,20 +355,20 @@ auto cpu::add_carry(u8 input, u8 operand) -> u8
 auto cpu::add(u8 value, mode mode) -> u8
 {
     add_arth_clock_time(mode);
-    return add_carry(value, read_next(mode));
+    return add_carry(value, read_next(mode, true));
 }
 
 auto cpu::sub(u8 value, mode mode) -> u8
 {
     add_arth_clock_time(mode);
-    return add_carry(value, ~read_next(mode));
+    return add_carry(value, ~read_next(mode, true));
 }
 
 void cpu::cmp(u8 value, mode mode)
 {
     add_arth_clock_time(mode);
 
-    i64 res{ value - read_next(mode) };
+    i64 res{ value - read_next(mode, true) };
     m_status.flags.negative = (res & 0x80) == 0x80;
     m_status.flags.zero = res == 0;
     m_status.flags.carry = res >= 0;

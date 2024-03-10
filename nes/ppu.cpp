@@ -114,7 +114,7 @@ void ppu::oam_dma(u8 value)
     for (u16 i = 0; i <= 0xFF; i++)
     {
         // FIXME: Remove?
-        m_oam_addr %= sizeof(m_oam);
+        // m_oam_addr %= sizeof(m_oam);
 
         m_oam[m_oam_addr] = m_system->m_cpu.m_bus.read(from);
         m_oam_addr++;
@@ -162,7 +162,7 @@ void ppu::write_oam_addr(u8 value)
 void ppu::write_oam(u8 value)
 {
     // FIXME: Remove?
-    m_oam_addr %= sizeof(m_oam);
+    // m_oam_addr %= sizeof(m_oam);
 
     m_oam[m_oam_addr] = value;
     m_oam_addr++;

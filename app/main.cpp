@@ -6,8 +6,8 @@
 #include <print>
 #include <thread>
 
-constexpr bool delay{ true };
-constexpr int scale{ 4 };
+constexpr bool delay{ false };
+constexpr int scale{ 2 };
 constexpr int width{ 256 };
 constexpr int height{ 240 };
 
@@ -25,7 +25,9 @@ auto init_sdl() -> bool
 int main(int argc, char* argv[])
 {
     auto async_file = spdlog::basic_logger_mt<spdlog::async_factory>("async", "output.txt");
-    // async_file->set_level(spdlog::level::trace);
+#ifndef NDEBUG
+    async_file->set_level(spdlog::level::trace);
+#endif
 
     if (!init_sdl())
         return 1;
@@ -65,16 +67,16 @@ int main(int argc, char* argv[])
 
         while (running)
         {
-            for (size_t i = 0; i < emulator.cycles_per_frame(); i++)
-            {
-                emulator.clock();
-            }
+            u64 cycles{ 0 };
+            while (cycles < emulator.cycles_per_frame())
+                cycles += emulator.clock();
+
             if (delay)
             {
                 const auto now{ SDL_GetPerformanceCounter() };
                 auto delta{ (f64)((now - last_frame) * 1000 / (f64)SDL_GetPerformanceFrequency()) };
 
-                while (delta < 30)
+                while (delta < 64)
                 {
                     const auto now{ SDL_GetPerformanceCounter() };
                     delta = (f64)((now - last_frame) * 1000 / (f64)SDL_GetPerformanceFrequency());
