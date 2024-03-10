@@ -2,6 +2,7 @@
 #include "emulator.h"
 #include "mappers/mmc1.h"
 #include "mappers/nrom.h"
+#include "mappers/uxrom.h"
 
 namespace cx::nes
 {
@@ -25,6 +26,7 @@ void mapper::register_mappers()
 {
     cx::nes::mapper::register_factory(0, [](emulator* system) { return std::make_unique<cx::nes::nrom>(system); });
     cx::nes::mapper::register_factory(1, [](emulator* system) { return std::make_unique<cx::nes::mmc1>(system); });
+    cx::nes::mapper::register_factory(2, [](emulator* system) { return std::make_unique<cx::nes::uxrom>(system); });
 }
 
 } // namespace cx::nes
