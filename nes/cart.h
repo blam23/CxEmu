@@ -32,7 +32,7 @@ class cart
         return m_state;
     }
 
-    bool load(const std::filesystem::path& path);
+    auto load(const std::filesystem::path& path) -> bool;
 
     auto mapper() const
     {
@@ -46,7 +46,7 @@ class cart
     mirroring m_mirroring{ mirroring::horizontal };
 
   private:
-    bool try_load();
+    auto try_load() -> bool;
 
     std::vector<u8> m_rom{};
     state m_state{ state::unloaded };

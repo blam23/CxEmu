@@ -1,4 +1,4 @@
-﻿#include "SDL.h"
+#include "SDL.h"
 #include "nes/emulator.h"
 #include "spdlog/async.h"
 #include "spdlog/sinks/basic_file_sink.h"
@@ -6,8 +6,8 @@
 #include <print>
 #include <thread>
 
-constexpr bool delay{ false };
-constexpr int scale{ 2 };
+constexpr bool delay{ true };
+constexpr int scale{ 4 };
 constexpr int width{ 256 };
 constexpr int height{ 240 };
 
@@ -22,7 +22,7 @@ auto init_sdl() -> bool
     return true;
 }
 
-int main(int argc, char* argv[])
+auto main(int argc, char* argv[]) -> int
 {
     auto async_file = spdlog::basic_logger_mt<spdlog::async_factory>("async", "output.txt");
 #ifndef NDEBUG
@@ -49,10 +49,25 @@ int main(int argc, char* argv[])
     SDL_Rect pixel_rect{ 0, 0, width, height };
     SDL_Rect window_rect{ 0, 0, width * scale, height * scale };
 
+    auto last_frame{ SDL_GetPerformanceCounter() };
     u64 frames{ 0 };
-    emulator.m_ppu.set_frame_complete_callback([pixel_surface, &frames](u8* data, size_t size) {
+    emulator.m_ppu.set_frame_complete_callback([pixel_surface, &last_frame, &frames](u8* data, size_t size) {
         SDL_memcpy(pixel_surface->pixels, data, size);
         frames++;
+
+        if (delay)
+        {
+            auto now{ SDL_GetPerformanceCounter() };
+            auto delta{ (f64)((now - last_frame) * 1000 / (f64)SDL_GetPerformanceFrequency()) };
+
+            while (delta < 16.666f)
+            {
+                now = SDL_GetPerformanceCounter();
+                delta = (f64)((now - last_frame) * 1000 / (f64)SDL_GetPerformanceFrequency());
+            }
+
+            last_frame = now;
+        }
     });
 
     // setup a renderer for just for vsync.
@@ -63,27 +78,11 @@ int main(int argc, char* argv[])
 
     bool running{ true };
     std::thread emu_thread{ [&]() {
-        auto last_frame{ SDL_GetPerformanceCounter() };
-
         while (running)
         {
             u64 cycles{ 0 };
             while (cycles < emulator.cycles_per_frame())
                 cycles += emulator.clock();
-
-            if (delay)
-            {
-                const auto now{ SDL_GetPerformanceCounter() };
-                auto delta{ (f64)((now - last_frame) * 1000 / (f64)SDL_GetPerformanceFrequency()) };
-
-                while (delta < 64)
-                {
-                    const auto now{ SDL_GetPerformanceCounter() };
-                    delta = (f64)((now - last_frame) * 1000 / (f64)SDL_GetPerformanceFrequency());
-                }
-
-                last_frame = now;
-            }
         }
     } };
 

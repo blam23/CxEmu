@@ -19,12 +19,11 @@ class emulator : public cx::emulator_base
   public:
     emulator(cart&& cart);
     auto clock() -> u8 override;
-    void reset() override;
-    void shudown() override;
+    auto reset() -> void override;
+    auto shudown() -> void override;
+    auto set_mirror(mirroring) -> void;
 
-    void set_mirror(mirroring);
-
-    static emulator load_rom(std::string_view path);
+    static auto load_rom(std::string_view path) -> emulator;
 
     cart m_cart;
     std::unique_ptr<mapper> m_mapper;

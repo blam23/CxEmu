@@ -15,21 +15,21 @@ class mapper
     {
     }
 
-    virtual u8 read(u16 addr) = 0;
-    virtual void write(u16 addr, u8 value) = 0;
+    virtual auto read(u16 addr) const -> u8 = 0;
+    virtual auto write(u16 addr, u8 value) -> void = 0;
 
-    virtual u8 read_chr_rom(u16 addr) = 0;
-    virtual void write_chr_rom(u16 addr, u8 value) = 0;
+    virtual auto read_chr_rom(u16 addr) const -> u8 = 0;
+    virtual auto write_chr_rom(u16 addr, u8 value) -> void = 0;
 
-    virtual bool is_irq_set() = 0;
-    virtual void scan_line() = 0;
+    virtual auto is_irq_set() -> bool = 0;
+    virtual auto scan_line() -> void = 0;
 
-    static void register_mappers();
+    static auto register_mappers() -> void;
 
     static auto create(u8 number, emulator* system) -> std::unique_ptr<mapper>;
 
     using factory = std::function<std::unique_ptr<mapper>(emulator* system)>;
-    static void register_factory(u8 number, factory factory)
+    static auto register_factory(u8 number, factory factory) -> void
     {
         s_factories[number] = factory;
     }

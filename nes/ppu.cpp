@@ -114,7 +114,7 @@ void ppu::oam_dma(u8 value)
     for (u16 i = 0; i <= 0xFF; i++)
     {
         // FIXME: Remove?
-        // m_oam_addr %= sizeof(m_oam);
+        m_oam_addr %= sizeof(m_oam);
 
         m_oam[m_oam_addr] = m_system->m_cpu.m_bus.read(from);
         m_oam_addr++;
@@ -162,7 +162,7 @@ void ppu::write_oam_addr(u8 value)
 void ppu::write_oam(u8 value)
 {
     // FIXME: Remove?
-    // m_oam_addr %= sizeof(m_oam);
+    m_oam_addr %= sizeof(m_oam);
 
     m_oam[m_oam_addr] = value;
     m_oam_addr++;
@@ -262,7 +262,7 @@ void ppu::setup_sprites_on_next_line()
         if (y > 0xEF)
             continue;
 
-        if (line >= y && line < y + height)
+        if (line >= y && line < y + static_cast<u64>(height))
         {
             m_current_sprites.push_back({ /* x = */ m_oam[i + 3],
                                           /* y = */ y,
@@ -334,7 +334,7 @@ auto ppu::render_pixel_background() -> bool
     return solid;
 }
 
-bool ppu::should_ignore_sprite(const sprite& sprite)
+bool ppu::should_ignore_sprite(const sprite& sprite) const
 {
     return sprite.y == 0 || sprite.y > RENDER_HEIGHT - 1 || m_scan_x < sprite.x || m_scan_x >= sprite.x + 8 ||
            m_scan_x < 8 && !m_mask.flags.show_sprites_leftmost;

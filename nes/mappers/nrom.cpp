@@ -8,7 +8,7 @@ nrom::nrom(emulator* system) : m_system(system)
     m_mask = m_system->m_cart.m_prg_rom_size > 1 ? 0x7FFF : 0x3FFF;
 }
 
-u8 nrom::read(u16 addr)
+auto nrom::read(u16 addr) const -> u8
 {
     if (addr >= 0x6000 && addr < 0x8000)
         return m_ram[addr - 0x6000];
@@ -19,7 +19,7 @@ u8 nrom::read(u16 addr)
     return 0;
 }
 
-void nrom::write(u16 addr, u8 value)
+auto nrom::write(u16 addr, u8 value) -> void
 {
     // NROM has no mapping or ctrl
 
@@ -27,12 +27,12 @@ void nrom::write(u16 addr, u8 value)
         m_ram[addr - 0x6000] = value;
 }
 
-bool nrom::is_irq_set()
+auto nrom::is_irq_set() -> bool
 {
     return false;
 }
 
-u8 nrom::read_chr_rom(u16 addr)
+auto nrom::read_chr_rom(u16 addr) const -> u8
 {
     if (addr < 0x2000)
         return m_system->m_cart.m_chr_rom[addr];
@@ -40,12 +40,12 @@ u8 nrom::read_chr_rom(u16 addr)
     return 0;
 }
 
-void nrom::write_chr_rom(u16 addr, u8 value)
+auto nrom::write_chr_rom(u16 addr, u8 value) -> void
 {
     return;
 }
 
-void nrom::scan_line()
+auto nrom::scan_line() -> void
 {
 }
 

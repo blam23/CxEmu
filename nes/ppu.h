@@ -15,13 +15,13 @@ class ppu
   public:
     ppu(emulator*);
 
-    void clock();
+    auto clock() -> void;
 
     auto read(u16 addr) -> u8;
-    void write(u16 addr, u8 value);
-    void oam_dma(u8 value);
+    auto write(u16 addr, u8 value) -> void;
+    auto oam_dma(u8 value) -> void;
 
-    void update_mirroring(mirroring);
+    auto update_mirroring(mirroring) -> void;
 
     ppu_bus m_bus;
 
@@ -34,7 +34,7 @@ class ppu
     static constexpr u32 RENDER_HEIGHT{ 240 };
 
     using frame_event = std::function<void(u8[], size_t)>;
-    void set_frame_complete_callback(frame_event);
+    auto set_frame_complete_callback(frame_event) -> void;
 
     u64 m_scan_x{ 21 };
     u64 m_scan_line{ 0 };
@@ -42,9 +42,9 @@ class ppu
   private:
     emulator* m_system;
 
-    void setup_sprites_on_next_line();
+    auto setup_sprites_on_next_line() -> void;
     auto render_pixel_background() -> bool;
-    void render_pixel_sprite(bool render_bg);
+    auto render_pixel_sprite(bool render_bg) -> void;
 
     struct colour
     {
@@ -70,7 +70,7 @@ class ppu
         u8 idx;
         bool is_sprite_zero;
     };
-    auto should_ignore_sprite(const sprite& sprite) -> bool;
+    auto should_ignore_sprite(const sprite& sprite) const -> bool;
 
     struct mask_struct
     {
@@ -91,13 +91,13 @@ class ppu
 
     mask_union m_mask{ 0 };
 
-    void write_ctrl(u8 value);
-    void write_mask(u8 value);
-    void write_oam_addr(u8 value);
-    void write_oam(u8 value);
-    void write_scroll(u8 value);
-    void write_addr(u8 value);
-    void write_addr_value(u8 value);
+    auto write_ctrl(u8 value) -> void;
+    auto write_mask(u8 value) -> void;
+    auto write_oam_addr(u8 value) -> void;
+    auto write_oam(u8 value) -> void;
+    auto write_scroll(u8 value) -> void;
+    auto write_addr(u8 value) -> void;
+    auto write_addr_value(u8 value) -> void;
 
     auto get_status_byte() -> u8;
     auto read_addr_value() -> u8;
@@ -149,7 +149,7 @@ class ppu
 
     // Events
     frame_event m_frame_completed;
-    void on_frame_completed();
+    auto on_frame_completed() -> void;
 };
 
 } // namespace cx::nes

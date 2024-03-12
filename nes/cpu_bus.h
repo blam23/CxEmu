@@ -12,14 +12,14 @@ class cpu_bus
   public:
     cpu_bus(emulator*);
 
-    u8 read(u16 addr);
-    void write(u16 addr, u8 value);
+    auto read(u16 addr) -> u8;
+    auto write(u16 addr, u8 value) -> void;
 
-    u16 read_word(u16 addr);
-    u16 read_word_wrapped(u16 addr);
+    auto read_word(u16 addr) -> u16;
+    auto read_word_wrapped(u16 addr) -> u16;
 
   private:
-    u8 m_ram[0x800];
+    u8 m_ram[0x800]{ 0 };
     emulator* m_system;
 };
 } // namespace cx::nes

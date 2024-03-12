@@ -1,4 +1,5 @@
 #include "mmc1.h"
+#include "spdlog/spdlog.h"
 
 namespace cx::nes
 {
@@ -7,9 +8,11 @@ mmc1::mmc1(emulator* system) : m_system(system)
 {
     m_control = 0x1C;
     m_prg_page_2 = m_system->m_cart.m_prg_rom_size - 1;
+
+    spdlog::info("chr rom size: {}", m_system->m_cart.m_chr_rom_size);
 }
 
-u8 mmc1::read(u16 addr)
+auto mmc1::read(u16 addr) const -> u8
 {
     if (addr >= 0x6000 && addr < 0x8000)
         return m_ram[addr - 0x6000];
@@ -34,7 +37,7 @@ u8 mmc1::read(u16 addr)
     return 0;
 }
 
-void mmc1::write(u16 addr, u8 value)
+auto mmc1::write(u16 addr, u8 value) -> void
 {
     if (addr >= 0x6000 && addr < 0x8000)
     {
@@ -45,7 +48,7 @@ void mmc1::write(u16 addr, u8 value)
     if (addr > 0x8000)
     {
         // Clear if value high bit is set
-        if ((value & 0x80) != 0)
+        if ((value & 0x80) == 0x80)
         {
             m_load = 0;
             m_load_count = 0;
@@ -113,7 +116,8 @@ void mmc1::write(u16 addr, u8 value)
                         m_prg_page_2 = m_load & 0x0F;
                         break;
                     case 3:
-                        // First page m_load, second page set to last page
+                        // First page m_load, second page set to last
+                        // page
                         m_prg_page_1 = m_load & 0x0F;
                         m_prg_page_2 = m_system->m_cart.m_prg_rom_size - 1;
                         break;
@@ -132,12 +136,12 @@ void mmc1::write(u16 addr, u8 value)
     }
 }
 
-bool mmc1::is_irq_set()
+auto mmc1::is_irq_set() -> bool
 {
     return false;
 }
 
-u8 mmc1::read_chr_rom(u16 addr)
+auto mmc1::read_chr_rom(u16 addr) const -> u8
 {
     if (addr < 0x2000)
     {
@@ -159,12 +163,12 @@ u8 mmc1::read_chr_rom(u16 addr)
     return 0;
 }
 
-void mmc1::write_chr_rom(u16 addr, u8 value)
+auto mmc1::write_chr_rom(u16 addr, u8 value) -> void
 {
     return;
 }
 
-void mmc1::scan_line()
+auto mmc1::scan_line() -> void
 {
 }
 

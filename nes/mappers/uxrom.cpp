@@ -8,7 +8,7 @@ uxrom::uxrom(emulator* system) : m_system(system)
     m_page_2 = m_system->m_cart.m_prg_rom_size - 1;
 }
 
-u8 uxrom::read(u16 addr)
+auto uxrom::read(u16 addr) const -> u8
 {
     if (addr >= 0x6000 && addr < 0x8000)
         return m_ram[addr - 0x6000];
@@ -22,7 +22,7 @@ u8 uxrom::read(u16 addr)
     return 0;
 }
 
-void uxrom::write(u16 addr, u8 value)
+auto uxrom::write(u16 addr, u8 value) -> void
 {
     if (addr >= 0x6000 && addr < 0x8000)
         m_ram[addr - 0x6000] = value;
@@ -31,12 +31,12 @@ void uxrom::write(u16 addr, u8 value)
         m_page_1 = value & 0x0F;
 }
 
-bool uxrom::is_irq_set()
+auto uxrom::is_irq_set() -> bool
 {
     return false;
 }
 
-u8 uxrom::read_chr_rom(u16 addr)
+auto uxrom::read_chr_rom(u16 addr) const -> u8
 {
     if (addr < 0x2000)
         return m_system->m_cart.m_chr_rom[addr];
@@ -44,12 +44,12 @@ u8 uxrom::read_chr_rom(u16 addr)
     return 0;
 }
 
-void uxrom::write_chr_rom(u16 addr, u8 value)
+auto uxrom::write_chr_rom(u16 addr, u8 value) -> void
 {
     return;
 }
 
-void uxrom::scan_line()
+auto uxrom::scan_line() -> void
 {
 }
 

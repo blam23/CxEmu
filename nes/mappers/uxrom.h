@@ -11,17 +11,17 @@ class uxrom : public mapper
   public:
     uxrom(emulator* system);
 
-    u8 read(u16 addr) override;
-    void write(u16 addr, u8 value) override;
+    auto read(u16 addr) const -> u8 override;
+    auto write(u16 addr, u8 value) -> void override;
 
-    u8 read_chr_rom(u16 addr) override;
-    void write_chr_rom(u16 addr, u8 value) override;
+    auto read_chr_rom(u16 addr) const -> u8 override;
+    auto write_chr_rom(u16 addr, u8 value) -> void override;
 
-    bool is_irq_set() override;
-    void scan_line() override;
+    auto is_irq_set() -> bool override;
+    auto scan_line() -> void override;
 
   private:
-    u8 m_ram[0x2000];
+    u8 m_ram[0x2000]{ 0 };
 
     u8 m_page_1{ 0x0 };
     u8 m_page_2{ 0x0 };

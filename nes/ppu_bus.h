@@ -13,12 +13,12 @@ class ppu_bus
   public:
     ppu_bus(emulator* system);
 
-    u8 read(u16 addr);
-    void write(u16 addr, u8 value);
+    auto read(u16 addr) -> u8;
+    auto write(u16 addr, u8 value) -> void;
 
-    u16 read_word(u16 addr);
-    u16 read_word_wrapped(u16 addr);
-    void update_mirroring(mirroring);
+    auto read_word(u16 addr) -> u16;
+    auto read_word_wrapped(u16 addr) -> u16;
+    auto update_mirroring(mirroring) -> void;
 
   private:
     u8 m_chr_ram[0x2000];
