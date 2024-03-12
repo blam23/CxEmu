@@ -13,7 +13,7 @@ cpu_bus::cpu_bus(emulator* system) : m_system{ system }
 u8 cpu_bus::read(u16 addr)
 {
     if (addr < 0x2000)
-        return m_ram[addr];
+        return m_ram[addr & 0x7ff];
     if (addr < 0x4000)
         return m_system->m_ppu.read(addr);
     if (addr == 0x4016)
@@ -29,7 +29,7 @@ u8 cpu_bus::read(u16 addr)
 void cpu_bus::write(u16 addr, u8 value)
 {
     if (addr < 0x2000)
-        m_ram[addr] = value;
+        m_ram[addr & 0x7ff] = value;
     else if (addr < 0x4000)
         m_system->m_ppu.write(addr, value);
     else if (addr == 0x4014)
