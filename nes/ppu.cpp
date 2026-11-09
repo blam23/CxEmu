@@ -63,9 +63,12 @@ void ppu::clock()
 
 auto ppu::read(u16 addr) -> u8
 {
-    if (addr == 0x2002)
+    auto instr{ addr & 0x0007u };
+
+
+    if (instr == 0x2)
         return get_status_byte();
-    if (addr == 0x2007)
+    if (instr == 0x7)
         return read_addr_value();
 
     std::println("PPU Read of unknown address: {}", addr);
@@ -74,7 +77,7 @@ auto ppu::read(u16 addr) -> u8
 
 void ppu::write(u16 addr, u8 value)
 {
-    auto instr{ addr & 0x000Fu };
+    auto instr{ addr & 0x0007u };
 
     switch (instr)
     {
