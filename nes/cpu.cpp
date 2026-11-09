@@ -35,7 +35,7 @@ auto cpu::clock() -> u64
                      m_system->m_ppu.m_scan_x, m_total_clock);
     }
 #endif
-    const auto func{ m_op_table[op] };
+    const auto& func{ m_op_table[op] };
     if (!func)
     {
         std::println("Op code '{:#04x}' not supported.", op);
