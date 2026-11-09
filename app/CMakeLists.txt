@@ -6,8 +6,6 @@ endif()
 
 include_directories("../")
 
-include("D:/vcpkg/scripts/buildsystems/vcpkg.cmake")
-
 find_package(SDL2 CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 target_link_libraries(CxEmu PRIVATE nes spdlog::spdlog $<TARGET_NAME_IF_EXISTS:SDL2::SDL2main> $<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static>)
