@@ -1,5 +1,6 @@
 #include "cpu.h"
 #include "emulator.h"
+#include <stdexcept>
 #include <print>
 
 #include "spdlog/spdlog.h"
@@ -206,9 +207,9 @@ auto cpu::get_address(mode mode, bool watch_page_boundary) -> u16
     case mode::imp:
     case mode::ind:
     case mode::rel:
-        throw std::exception("NYI");
+        throw std::runtime_error("NYI");
     default:
-        throw std::exception("Unknown address mode.");
+        throw std::runtime_error("Unknown address mode.");
     }
 }
 
@@ -241,7 +242,7 @@ auto cpu::load(mode mode) -> u8
     else if (mode == mode::indy)
         m_clock += 5;
     else
-        throw std::exception("Invalid load");
+        throw std::runtime_error("Invalid load");
 
     auto value{ read_next(mode, true) };
     set_negative_and_zero(value);
@@ -259,7 +260,7 @@ void cpu::store(u8 value, mode mode)
     else if (mode == mode::indx || mode == mode::indy)
         m_clock += 6;
     else
-        throw std::exception("Invalid store");
+        throw std::runtime_error("Invalid store");
 
     write_next(mode, value);
 }
@@ -545,7 +546,7 @@ void cpu::test_bit(mode mode)
         pc += 3;
         break;
     default:
-        throw std::exception("Invalid BIT");
+        throw std::runtime_error("Invalid BIT");
     }
 
     m_status.flags.zero = (value & a) == 0;
@@ -577,7 +578,7 @@ void cpu::jump(mode mode)
 
         break;
     default:
-        throw std::exception("Invalid JMP");
+        throw std::runtime_error("Invalid JMP");
     }
 }
 

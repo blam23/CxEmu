@@ -1,5 +1,6 @@
 #include "cart.h"
 
+#include <cstring>
 #include <iostream>
 
 namespace cx::nes

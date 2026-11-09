@@ -5,8 +5,12 @@
       "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
       "binaryDir": "${sourceDir}/out/build/${presetName}",
       "cacheVariables": {
-        "CMAKE_C_COMPILER": "cl.exe",
-        "CMAKE_CXX_COMPILER": "cl.exe"
+        "CMAKE_C_COMPILER": "$env{GCC_ROOT}/bin/gcc.exe",
+        "CMAKE_CXX_COMPILER": "$env{GCC_ROOT}/bin/g++.exe",
+        "VCPKG_TARGET_TRIPLET": "x64-mingw-static"
+      },
+      "environment": {
+        "PATH": "$env{GCC_ROOT}/bin;$penv{PATH}"
       },
       "condition": {
         "type": "equals",
@@ -22,10 +26,6 @@
       "name": "x64-debug",
       "displayName": "Debug",
       "inherits": "windows-base",
-      "architecture": {
-        "value": "x64",
-        "strategy": "external"
-      },
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug"
       }

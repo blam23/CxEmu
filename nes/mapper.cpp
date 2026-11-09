@@ -1,4 +1,5 @@
 #include "mapper.h"
+#include <stdexcept>
 #include "emulator.h"
 #include "mappers/mmc1.h"
 #include "mappers/nrom.h"
@@ -17,7 +18,7 @@ auto mapper::create(u8 number, emulator* system) -> std::unique_ptr<mapper>
 
     auto itr{ s_factories.find(number) };
     if (itr == s_factories.end())
-        throw std::exception{ "Mapper not supported." };
+        throw std::runtime_error{ "Mapper not supported." };
 
     return itr->second(system);
 }

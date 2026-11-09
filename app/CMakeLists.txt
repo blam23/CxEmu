@@ -9,3 +9,9 @@ include_directories("../")
 find_package(SDL2 CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 target_link_libraries(CxEmu PRIVATE nes spdlog::spdlog $<TARGET_NAME_IF_EXISTS:SDL2::SDL2main> $<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static>)
+
+# GCC's std::print terminal support lives in libstdc++exp
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  target_link_libraries(CxEmu PRIVATE stdc++exp)
+  target_link_options(CxEmu PRIVATE -static)
+endif()
