@@ -3,6 +3,7 @@
 #include "core/types.h"
 #include "cpu_bus.h"
 #include "forward.h"
+#include <functional>
 
 namespace cx::nes
 {

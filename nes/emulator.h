@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "core/emulator_base.h"
 
@@ -10,6 +10,8 @@
 #include "mapper.h"
 #include "mirroring.h"
 #include "ppu.h"
+#include <memory>
+#include <string_view>
 
 namespace cx::nes
 {

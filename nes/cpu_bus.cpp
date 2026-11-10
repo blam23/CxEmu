@@ -55,7 +55,9 @@ u16 cpu_bus::read_word(u16 addr)
 u16 cpu_bus::read_word_wrapped(u16 addr)
 {
     u16 high = (addr & 0xFF) == 0xFF ? addr - 0xFF : addr + 1;
-    return read(addr) | read(high) << 8;
+    u16 low = read(addr);
+    u16 hi = read(high);
+    return low | (hi << 8);
 }
 
 } // namespace cx::nes

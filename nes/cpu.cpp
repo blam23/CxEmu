@@ -1,6 +1,7 @@
 #include "cpu.h"
 #include "emulator.h"
 #include <stdexcept>
+#include <cstdlib>
 #include <print>
 
 #include "spdlog/spdlog.h"
@@ -133,7 +134,9 @@ auto cpu::pull() -> u8
 
 auto cpu::pull_word() -> u16
 {
-    return pull() | (pull() << 8);
+    u16 low = pull();
+    u16 high = pull();
+    return low | (high << 8);
 }
 
 void cpu::pull_status()

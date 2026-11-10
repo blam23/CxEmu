@@ -6,6 +6,8 @@
 #include "mapper.h"
 #include "ppu_bus.h"
 #include <vector>
+#include <cstddef>
+#include <functional>
 
 namespace cx::nes
 {
